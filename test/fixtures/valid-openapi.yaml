@@ -1,0 +1,19 @@
+openapi: "3.0.3"
+info:
+  title: Test API
+  version: "1.0.0"
+  description: A test API for linting
+  contact:
+    name: Test Team
+    email: test@example.com
+servers:
+  - url: https://api.example.com/v1
+paths:
+  /items:
+    get:
+      operationId: get-items
+      summary: Get items
+      description: Returns a list of items
+      responses:
+        "200":
+          description: A list of items
