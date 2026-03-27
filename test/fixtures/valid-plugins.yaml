@@ -1,0 +1,4 @@
+get-items:
+  - name: rate-limiting
+    config:
+      minute: 100
