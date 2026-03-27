@@ -17,7 +17,7 @@ describe('runKongCheck', () => {
     expect(issues[0].operationId).toBe('get-items');
   });
 
-  test('issue message includes the operationId', async () => {
+  test('issue message references the operationId', async () => {
     const issues = await runKongCheck(VALID_SPEC, MISSING_PLUGINS);
     expect(issues[0].message).toMatch(/get-items/);
   });

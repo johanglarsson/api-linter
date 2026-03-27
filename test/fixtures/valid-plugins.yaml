@@ -1,4 +1,10 @@
-get-items:
-  - name: rate-limiting
+_format_version: "3.0"
+plugins:
+  - name: acl
     config:
-      minute: 100
+      allow:
+        - consumer_group
+        - myservice_get-items_group
+      hide_groups_header: true
+    instance_name: mysystem_myservice_get-items_acl
+    route: myservice_get-items
