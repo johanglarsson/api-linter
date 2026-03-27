@@ -10,12 +10,16 @@ export interface KongIssue {
 export interface LintOptions {
   kongPlugins?: string;
   junit?: string;
+  fix?: boolean;
+  serviceName?: string;
+  systemId?: string;
 }
 
 export interface LintResult {
   hasErrors: boolean;
   spectralResults: ISpectralDiagnostic[];
   kongIssues: KongIssue[];
+  fixedCount: number;
 }
 
 export interface PrintOptions {
