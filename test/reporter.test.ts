@@ -2,14 +2,13 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import type { ISpectralDiagnostic } from '@stoplight/spectral-core';
-import { DiagnosticSeverity } from '@stoplight/spectral-core';
 import { printResults, writeJunit } from '../src/reporter';
 import type { KongIssue } from '../src/types';
 
 const mockSpectralError: ISpectralDiagnostic = {
   code: 'oas3-schema',
   message: 'Schema error',
-  severity: DiagnosticSeverity.Error,
+  severity: 0, // DiagnosticSeverity.Error
   range: { start: { line: 5, character: 2 }, end: { line: 5, character: 10 } },
   path: ['paths', '/items', 'get'],
   source: '/fake/spec.yaml',
@@ -19,14 +18,14 @@ const mockSpectralWarn: ISpectralDiagnostic = {
   ...mockSpectralError,
   code: 'operation-id-kebab-case',
   message: 'operationId must be kebab-case',
-  severity: DiagnosticSeverity.Warning,
+  severity: 1, // DiagnosticSeverity.Warning
 };
 
 const mockKongIssue: KongIssue = {
   operationId: 'get-items',
   path: '/items',
   method: 'get',
-  message: 'operationId "get-items" is not present as a top-level key in plugins.yaml',
+  message: 'operationId "get-items" has no ACL plugin entry in plugins.yaml',
 };
 
 describe('printResults', () => {
