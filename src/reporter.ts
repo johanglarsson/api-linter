@@ -27,10 +27,16 @@ function formatSpectralResults(
 
 function formatKongIssues(kongIssues: KongIssue[], pluginsPath: string): string | null {
   if (kongIssues.length === 0) return null;
+  const n = kongIssues.length;
   const lines: string[] = [`Kong plugins check (${pluginsPath})`];
   for (const issue of kongIssues) {
     lines.push(`  [missing]  ${issue.message}`);
   }
+  lines.push('');
+  lines.push(
+    `  ${n} missing entr${n === 1 ? 'y' : 'ies'} — re-run with` +
+      ' --fix --service-name <name> --system-id <id> to generate ACL plugin entries'
+  );
   return lines.join('\n');
 }
 

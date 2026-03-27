@@ -1,2 +1,10 @@
-some-other-op:
-  - name: key-auth
+_format_version: "3.0"
+plugins:
+  - name: acl
+    config:
+      allow:
+        - consumer_group
+        - myservice_some-other-op_group
+      hide_groups_header: true
+    instance_name: mysystem_myservice_some-other-op_acl
+    route: myservice_some-other-op

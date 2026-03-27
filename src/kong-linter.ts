@@ -28,6 +28,17 @@ interface OpenApiSpec {
   [key: string]: unknown;
 }
 
+interface KongPluginEntry {
+  route?: string;
+  [key: string]: unknown;
+}
+
+interface KongPluginsFile {
+  _format_version?: string;
+  plugins?: KongPluginEntry[];
+  [key: string]: unknown;
+}
+
 function collectOperations(
   openapiPath: string
 ): Array<{ operationId: string; path: string; method: string }> {
@@ -78,22 +89,31 @@ export async function runKongCheck(
     );
   }
 
-  const pluginsMap = yaml.load(pluginsContent);
-  if (!pluginsMap || typeof pluginsMap !== 'object' || Array.isArray(pluginsMap)) {
-    throw new Error(
-      `Kong plugins file "${pluginsPath}" is empty or not a valid YAML mapping`
-    );
+  const parsed = yaml.load(pluginsContent) as KongPluginsFile | null;
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error(`Kong plugins file "${pluginsPath}" is empty or not a valid YAML mapping`);
   }
 
-  const pluginKeys = new Set(Object.keys(pluginsMap as object));
+  // Build set of route values from the plugins array
+  const routes = new Set(
+    (parsed.plugins ?? [])
+      .map((p) => p.route)
+      .filter((r): r is string => typeof r === 'string')
+  );
+
+  // An operationId is covered when a route ends with _${operationId}
+  // (format: ${serviceName}_${operationId})
+  const isCovered = (operationId: string): boolean =>
+    [...routes].some((route) => route === operationId || route.endsWith(`_${operationId}`));
+
   const issues: KongIssue[] = [];
   for (const { operationId, path: opPath, method } of operations) {
-    if (!pluginKeys.has(operationId)) {
+    if (!isCovered(operationId)) {
       issues.push({
         operationId,
         path: opPath,
         method,
-        message: `operationId "${operationId}" is not present as a top-level key in ${pluginsPath}`,
+        message: `operationId "${operationId}" has no ACL plugin entry in ${pluginsPath}`,
       });
     }
   }
