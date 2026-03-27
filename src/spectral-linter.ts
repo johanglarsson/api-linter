@@ -1,6 +1,6 @@
 import { Spectral, Document } from '@stoplight/spectral-core';
 import type { ISpectralDiagnostic } from '@stoplight/spectral-core';
-import { Yaml, Json } from '@stoplight/spectral-parsers';
+import { Yaml } from '@stoplight/spectral-parsers';
 import * as path from 'path';
 import * as fs from 'fs';
 import ruleset from './ruleset';
@@ -16,10 +16,8 @@ export async function runSpectral(openapiPath: string): Promise<ISpectralDiagnos
     );
   }
 
-  const ext = path.extname(absolutePath).toLowerCase();
-  const parser = ext === '.json' ? Json : Yaml;
-
-  const document = new Document(content, parser, absolutePath);
+  // Yaml parser handles both .yaml and .json (JSON is valid YAML)
+  const document = new Document(content, Yaml, absolutePath);
   const spectral = new Spectral();
   spectral.setRuleset(ruleset);
 
