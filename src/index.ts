@@ -1,10 +1,11 @@
-'use strict';
+import { runSpectral } from './spectral-linter';
+import { runKongCheck } from './kong-linter';
+import { printResults, writeJunit } from './reporter';
+import type { LintOptions, LintResult } from './types';
 
-const { runSpectral } = require('./spectral-linter');
-const { runKongCheck } = require('./kong-linter');
-const { printResults, writeJunit } = require('./reporter');
+export type { KongIssue, LintOptions, LintResult } from './types';
 
-async function lint(openapiPath, options = {}) {
+export async function lint(openapiPath: string, options: LintOptions = {}): Promise<LintResult> {
   const spectralResults = await runSpectral(openapiPath);
   const kongIssues = options.kongPlugins
     ? await runKongCheck(openapiPath, options.kongPlugins)
@@ -12,7 +13,7 @@ async function lint(openapiPath, options = {}) {
 
   const { hasErrors } = printResults(spectralResults, kongIssues, {
     openapiPath,
-    pluginsPath: options.kongPlugins || '',
+    pluginsPath: options.kongPlugins ?? '',
   });
 
   if (options.junit) {
@@ -23,5 +24,3 @@ async function lint(openapiPath, options = {}) {
 
   return { hasErrors, spectralResults, kongIssues };
 }
-
-module.exports = { lint };

@@ -1,9 +1,8 @@
-'use strict';
+import type { RulesetDefinition } from '@stoplight/spectral-core';
+import { oas } from '@stoplight/spectral-rulesets';
+import { truthy } from '@stoplight/spectral-functions';
 
-const { oas } = require('@stoplight/spectral-rulesets');
-const { truthy } = require('@stoplight/spectral-functions');
-
-function operationIdKebabCase(targetVal) {
+function operationIdKebabCase(targetVal: unknown): { message: string }[] | void {
   if (typeof targetVal !== 'string') return;
   if (!/^[a-z][a-z0-9-]*$/.test(targetVal)) {
     return [
@@ -14,7 +13,7 @@ function operationIdKebabCase(targetVal) {
   }
 }
 
-module.exports = {
+const ruleset: RulesetDefinition = {
   extends: [[oas, 'recommended']],
   rules: {
     'operation-id-kebab-case': {
@@ -23,6 +22,7 @@ module.exports = {
       severity: 'warn',
       given: '$.paths[*][get,post,put,delete,patch,options,head].operationId',
       then: {
+        // @ts-expect-error custom function signature is compatible at runtime
         function: operationIdKebabCase,
       },
     },
@@ -37,3 +37,5 @@ module.exports = {
     },
   },
 };
+
+export default ruleset;

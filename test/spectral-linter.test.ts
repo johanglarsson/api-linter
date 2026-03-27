@@ -1,7 +1,5 @@
-'use strict';
-
-const path = require('path');
-const { runSpectral } = require('../src/spectral-linter');
+import * as path from 'path';
+import { runSpectral } from '../src/spectral-linter';
 
 const VALID_SPEC = path.join(__dirname, 'fixtures/valid-openapi.yaml');
 const INVALID_SPEC = path.join(__dirname, 'fixtures/invalid-openapi.yaml');

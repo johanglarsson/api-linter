@@ -1,16 +1,15 @@
-'use strict';
+import * as path from 'path';
+import { spawnSync } from 'child_process';
+import type { SpawnSyncReturns } from 'child_process';
+import * as fs from 'fs';
+import * as os from 'os';
 
-const path = require('path');
-const { spawnSync } = require('child_process');
-const fs = require('fs');
-const os = require('os');
-
-const CLI = path.join(__dirname, '..', 'src', 'cli.js');
+const CLI = path.join(__dirname, '..', 'dist', 'cli.js');
 const VALID_SPEC = path.join(__dirname, 'fixtures/valid-openapi.yaml');
 const VALID_PLUGINS = path.join(__dirname, 'fixtures/valid-plugins.yaml');
 const MISSING_PLUGINS = path.join(__dirname, 'fixtures/missing-ops-plugins.yaml');
 
-function runCli(...args) {
+function runCli(...args: string[]): SpawnSyncReturns<string> {
   return spawnSync('node', [CLI, ...args], { encoding: 'utf8', timeout: 30000 });
 }
 

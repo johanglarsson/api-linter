@@ -1,32 +1,44 @@
-'use strict';
+import * as fs from 'fs';
+import * as path from 'path';
+import type { ISpectralDiagnostic } from '@stoplight/spectral-core';
+import type { KongIssue, PrintOptions, WriteJunitOptions } from './types';
 
-const fs = require('fs');
-const path = require('path');
+const SEVERITY_LABEL: Record<number, string> = {
+  0: 'error',
+  1: 'warning',
+  2: 'information',
+  3: 'hint',
+};
 
-const SEVERITY_LABEL = { 0: 'error', 1: 'warning', 2: 'information', 3: 'hint' };
-
-function formatSpectralResults(spectralResults, openapiPath) {
+function formatSpectralResults(
+  spectralResults: ISpectralDiagnostic[],
+  openapiPath: string
+): string | null {
   if (spectralResults.length === 0) return null;
-  const lines = [openapiPath];
+  const lines: string[] = [openapiPath];
   for (const result of spectralResults) {
     const line = result.range.start.line + 1;
     const col = result.range.start.character + 1;
     const sev = SEVERITY_LABEL[result.severity] ?? 'unknown';
-    lines.push(`  ${line}:${col}  ${sev}  ${result.code}  ${result.message}`);
+    lines.push(`  ${line}:${col}  ${sev}  ${String(result.code)}  ${result.message}`);
   }
   return lines.join('\n');
 }
 
-function formatKongIssues(kongIssues, pluginsPath) {
+function formatKongIssues(kongIssues: KongIssue[], pluginsPath: string): string | null {
   if (kongIssues.length === 0) return null;
-  const lines = [`Kong plugins check (${pluginsPath})`];
+  const lines: string[] = [`Kong plugins check (${pluginsPath})`];
   for (const issue of kongIssues) {
     lines.push(`  [missing]  ${issue.message}`);
   }
   return lines.join('\n');
 }
 
-function printResults(spectralResults, kongIssues, { openapiPath = '', pluginsPath = '' } = {}) {
+export function printResults(
+  spectralResults: ISpectralDiagnostic[],
+  kongIssues: KongIssue[],
+  { openapiPath = '', pluginsPath = '' }: PrintOptions = {}
+): { hasErrors: boolean } {
   const spectralOutput = formatSpectralResults(spectralResults, openapiPath);
   const kongOutput = formatKongIssues(kongIssues, pluginsPath);
 
@@ -43,7 +55,7 @@ function printResults(spectralResults, kongIssues, { openapiPath = '', pluginsPa
   return { hasErrors };
 }
 
-function escapeXml(str) {
+function escapeXml(str: unknown): string {
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -52,14 +64,19 @@ function escapeXml(str) {
     .replace(/'/g, '&apos;');
 }
 
-function writeJunit(spectralResults, kongIssues, outputPath, { includeKong = false } = {}) {
+export function writeJunit(
+  spectralResults: ISpectralDiagnostic[],
+  kongIssues: KongIssue[],
+  outputPath: string,
+  { includeKong = false }: WriteJunitOptions = {}
+): void {
   const spectralErrors = spectralResults.filter((r) => r.severity === 0).length;
   const spectralTests = spectralResults.length || 1;
 
   const spectralTestcases = spectralResults.map((result) => {
     const line = result.range.start.line + 1;
     const sev = SEVERITY_LABEL[result.severity] ?? 'unknown';
-    const name = escapeXml(`${result.code} at line ${line}`);
+    const name = escapeXml(`${String(result.code)} at line ${line}`);
     const classname = escapeXml(String(result.code));
     const detail = escapeXml(`${sev}: ${result.message} (line ${line})`);
     if (result.severity === 0) {
@@ -109,5 +126,3 @@ function writeJunit(spectralResults, kongIssues, outputPath, { includeKong = fal
 
   fs.writeFileSync(path.resolve(outputPath), xml, 'utf8');
 }
-
-module.exports = { printResults, writeJunit, formatSpectralResults, formatKongIssues };

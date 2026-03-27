@@ -1,27 +1,28 @@
-'use strict';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as os from 'os';
+import type { ISpectralDiagnostic } from '@stoplight/spectral-core';
+import { DiagnosticSeverity } from '@stoplight/spectral-core';
+import { printResults, writeJunit } from '../src/reporter';
+import type { KongIssue } from '../src/types';
 
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
-const { printResults, writeJunit } = require('../src/reporter');
-
-const mockSpectralError = {
+const mockSpectralError: ISpectralDiagnostic = {
   code: 'oas3-schema',
   message: 'Schema error',
-  severity: 0,
+  severity: DiagnosticSeverity.Error,
   range: { start: { line: 5, character: 2 }, end: { line: 5, character: 10 } },
   path: ['paths', '/items', 'get'],
   source: '/fake/spec.yaml',
 };
 
-const mockSpectralWarn = {
+const mockSpectralWarn: ISpectralDiagnostic = {
   ...mockSpectralError,
   code: 'operation-id-kebab-case',
   message: 'operationId must be kebab-case',
-  severity: 1,
+  severity: DiagnosticSeverity.Warning,
 };
 
-const mockKongIssue = {
+const mockKongIssue: KongIssue = {
   operationId: 'get-items',
   path: '/items',
   method: 'get',
@@ -29,7 +30,7 @@ const mockKongIssue = {
 };
 
 describe('printResults', () => {
-  let consoleSpy;
+  let consoleSpy: jest.SpyInstance;
 
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -66,7 +67,7 @@ describe('printResults', () => {
 });
 
 describe('writeJunit', () => {
-  let tmpFile;
+  let tmpFile: string;
 
   beforeEach(() => {
     tmpFile = path.join(os.tmpdir(), `junit-test-${Date.now()}.xml`);

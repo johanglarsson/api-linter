@@ -1,7 +1,5 @@
-'use strict';
-
-const path = require('path');
-const { runKongCheck } = require('../src/kong-linter');
+import * as path from 'path';
+import { runKongCheck } from '../src/kong-linter';
 
 const VALID_SPEC = path.join(__dirname, 'fixtures/valid-openapi.yaml');
 const VALID_PLUGINS = path.join(__dirname, 'fixtures/valid-plugins.yaml');
